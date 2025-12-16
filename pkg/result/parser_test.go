@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/openshift-hyperfleet/status-reporter/job-status-reporter/pkg/result"
+	"github.com/openshift-hyperfleet/status-reporter/pkg/result"
 )
 
 var _ = Describe("Parser", func() {

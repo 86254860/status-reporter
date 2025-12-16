@@ -11,10 +11,10 @@ import (
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/openshift-hyperfleet/status-reporter/job-status-reporter/pkg/k8s"
-	"github.com/openshift-hyperfleet/status-reporter/job-status-reporter/pkg/reporter"
-	"github.com/openshift-hyperfleet/status-reporter/job-status-reporter/pkg/reporter/testhelpers"
-	"github.com/openshift-hyperfleet/status-reporter/job-status-reporter/pkg/result"
+	"github.com/openshift-hyperfleet/status-reporter/pkg/k8s"
+	"github.com/openshift-hyperfleet/status-reporter/pkg/reporter"
+	"github.com/openshift-hyperfleet/status-reporter/pkg/reporter/testhelpers"
+	"github.com/openshift-hyperfleet/status-reporter/pkg/result"
 )
 
 var _ = Describe("Reporter", func() {

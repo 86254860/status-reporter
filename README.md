@@ -184,35 +184,124 @@ The status reporter is configured exclusively through environment variables. Bel
 
 ### Configuration Example
 
-Here's a complete example showing how to configure the status reporter in a Kubernetes Job:
+Here's a complete example showing how to configure the status reporter. 
+### RBAC configuration for Job Status Reporter
+```yaml
+---
+# ServiceAccount for the validator job
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: status-reporter-sa
+  namespace: <namespace>
 
+---
+# Role with necessary permissions for status reporter
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: status-reporter
+  namespace: <namespace>
+rules:
+# Permission to get and update job status
+- apiGroups: ["batch"]
+  resources: ["jobs"]
+  verbs: ["get"]
+- apiGroups: ["batch"]
+  resources: ["jobs/status"]
+  verbs: ["get", "update", "patch"]
+# Permission to get pod status
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+
+---
+# RoleBinding to grant permissions to the service account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: status-reporter
+  namespace: <namespace>
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: status-reporter
+subjects:
+- kind: ServiceAccount
+  name: status-reporter-sa
+  namespace: <namespace>
+```
+```bash
+sed 's/<namespace>/your-namespace/g' rbac.yaml | kubectl apply -f -
+```
+
+### K8s Job configuration for Status Reporter
 ```yaml
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: my-adapter-job
-  namespace: default
+  namespace: <namespace>
 spec:
   backoffLimit: 0
   activeDeadlineSeconds: 310  # 300 adapter timeout + 10 second buffer
   template:
     spec:
+      serviceAccountName: status-reporter-sa   
       volumes:
       - name: results
         emptyDir: {}
 
       containers:
+      # Replace with real adapter information
       - name: my-adapter
-        image: my-adapter:latest # Replace with real adapter image
-        env:
-        - name: RESULTS_PATH
-          value: "/results/custom-result.json"
+        image: busybox:1.36
+        imagePullPolicy: IfNotPresent
+
+        # Adapter writes results to shared volume
         volumeMounts:
         - name: results
           mountPath: /results
 
+        # Simulate adapter work and write result file
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Simulating adapter validation work..."
+          sleep 3
+          # Write adapter result in the expected JSON format
+          # Success example:
+          cat > $RESULTS_PATH <<'EOF'
+          {
+            "status": "success",
+            "reason": "GCPValidationPassed",
+            "message": "All GCP infrastructure validations completed successfully",
+            "details": {
+              "validations_run": 5,
+              "validations_passed": 5,
+              "checks": [
+                "VPC configuration validated",
+                "IAM permissions verified",
+                "DNS settings confirmed",
+                "Network policies applied",
+                "Resource quotas checked"
+              ],
+              "duration_seconds": 3,
+              "gcp_project": "example-project-123"
+            }
+          }
+          EOF
+
+          echo "Adapter result written to $RESULTS_PATH"
+          cat $RESULTS_PATH
+          sleep 5
+        env:
+        - name: RESULTS_PATH
+          value: "/results/adapter-result.json"
+
       - name: status-reporter
-        image: status-reporter:latest
+        image: <status-reporter-image>
         env:
         # Required configuration
         - name: JOB_NAME
@@ -228,15 +317,15 @@ spec:
 
         # Optional configuration (shown with non-default values)
         - name: RESULTS_PATH
-          value: "/results/custom-result.json"
+          value: "/results/adapter-result.json"
         - name: POLL_INTERVAL_SECONDS
           value: "5"
         - name: MAX_WAIT_TIME_SECONDS
           value: "300"  # 5 minutes
         - name: CONDITION_TYPE
-          value: "Ready"
+          value: "Available"
         - name: LOG_LEVEL
-          value: "debug"
+          value: "info"
         - name: ADAPTER_CONTAINER_NAME
           value: "my-adapter"
 
@@ -247,10 +336,16 @@ spec:
       restartPolicy: Never
 ```
 
+```bash
+sed -e 's|<namespace>|your-namespace|g' \
+    -e 's|<status-reporter-image>|quay.io/rh-ee-dawang/status-reporter:dev-04e8d0a|g' \
+    job.yaml | kubectl apply -f -
+```
+
 ## Repository Structure
 
 ```text
-job-status-reporter/
+status-reporter/
 ├── cmd/reporter/         # Main entry point
 ├── pkg/                  # Core packages (reporter, k8s, result parser)
 ├── Dockerfile            # Container image definition

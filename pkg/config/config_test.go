@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/openshift-hyperfleet/status-reporter/job-status-reporter/pkg/config"
+	"github.com/openshift-hyperfleet/status-reporter/pkg/config"
 )
 
 var _ = Describe("Config", func() {

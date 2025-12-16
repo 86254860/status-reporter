@@ -11,8 +11,8 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 
-	"github.com/openshift-hyperfleet/status-reporter/job-status-reporter/pkg/k8s"
-	"github.com/openshift-hyperfleet/status-reporter/job-status-reporter/pkg/result"
+	"github.com/openshift-hyperfleet/status-reporter/pkg/k8s"
+	"github.com/openshift-hyperfleet/status-reporter/pkg/result"
 )
 
 const (

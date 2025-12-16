@@ -1,4 +1,4 @@
-module github.com/openshift-hyperfleet/status-reporter/job-status-reporter
+module github.com/openshift-hyperfleet/status-reporter
 
 go 1.25.0
 

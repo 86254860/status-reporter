@@ -11,8 +11,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/openshift-hyperfleet/status-reporter/job-status-reporter/pkg/config"
-	"github.com/openshift-hyperfleet/status-reporter/job-status-reporter/pkg/reporter"
+	"github.com/openshift-hyperfleet/status-reporter/pkg/config"
+	"github.com/openshift-hyperfleet/status-reporter/pkg/reporter"
 )
 
 const (
