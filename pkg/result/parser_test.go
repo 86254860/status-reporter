@@ -34,7 +34,7 @@ var _ = Describe("Parser", func() {
 		})
 
 		AfterEach(func() {
-			os.RemoveAll(tmpDir)
+			Expect(os.RemoveAll(tmpDir)).To(Succeed())
 		})
 
 		Context("with valid files", func() {

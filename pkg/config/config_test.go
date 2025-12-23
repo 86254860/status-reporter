@@ -22,16 +22,16 @@ var _ = Describe("Config", func() {
 		}
 		for _, key := range envVars {
 			originalEnv[key] = os.Getenv(key)
-			os.Unsetenv(key)
+			Expect(os.Unsetenv(key)).To(Succeed())
 		}
 	})
 
 	AfterEach(func() {
 		for key, value := range originalEnv {
 			if value != "" {
-				os.Setenv(key, value)
+				Expect(os.Setenv(key, value)).To(Succeed())
 			} else {
-				os.Unsetenv(key)
+				Expect(os.Unsetenv(key)).To(Succeed())
 			}
 		}
 	})
@@ -39,9 +39,9 @@ var _ = Describe("Config", func() {
 	Describe("Load", func() {
 		Context("with valid required configuration", func() {
 			BeforeEach(func() {
-				os.Setenv("JOB_NAME", "test-job")
-				os.Setenv("JOB_NAMESPACE", "test-namespace")
-				os.Setenv("POD_NAME", "test-pod")
+				Expect(os.Setenv("JOB_NAME", "test-job")).To(Succeed())
+				Expect(os.Setenv("JOB_NAMESPACE", "test-namespace")).To(Succeed())
+				Expect(os.Setenv("POD_NAME", "test-pod")).To(Succeed())
 			})
 
 			It("loads configuration successfully", func() {
@@ -65,12 +65,12 @@ var _ = Describe("Config", func() {
 			})
 
 			It("uses custom values when provided", func() {
-				os.Setenv("RESULTS_PATH", "/results/custom/path.json")
-				os.Setenv("POLL_INTERVAL_SECONDS", "5")
-				os.Setenv("MAX_WAIT_TIME_SECONDS", "600")
-				os.Setenv("CONDITION_TYPE", "Ready")
-				os.Setenv("LOG_LEVEL", "debug")
-				os.Setenv("ADAPTER_CONTAINER_NAME", "my-adapter")
+				Expect(os.Setenv("RESULTS_PATH", "/results/custom/path.json")).To(Succeed())
+				Expect(os.Setenv("POLL_INTERVAL_SECONDS", "5")).To(Succeed())
+				Expect(os.Setenv("MAX_WAIT_TIME_SECONDS", "600")).To(Succeed())
+				Expect(os.Setenv("CONDITION_TYPE", "Ready")).To(Succeed())
+				Expect(os.Setenv("LOG_LEVEL", "debug")).To(Succeed())
+				Expect(os.Setenv("ADAPTER_CONTAINER_NAME", "my-adapter")).To(Succeed())
 
 				cfg, err := config.Load()
 				Expect(err).NotTo(HaveOccurred())
@@ -83,8 +83,8 @@ var _ = Describe("Config", func() {
 			})
 
 			It("trims whitespace from values", func() {
-				os.Setenv("JOB_NAME", "  test-job  ")
-				os.Setenv("JOB_NAMESPACE", "  test-namespace  ")
+				Expect(os.Setenv("JOB_NAME", "  test-job  ")).To(Succeed())
+				Expect(os.Setenv("JOB_NAMESPACE", "  test-namespace  ")).To(Succeed())
 
 				cfg, err := config.Load()
 				Expect(err).NotTo(HaveOccurred())
@@ -95,8 +95,8 @@ var _ = Describe("Config", func() {
 
 		Context("with missing required configuration", func() {
 			It("returns error when JOB_NAME is missing", func() {
-				os.Setenv("JOB_NAMESPACE", "test-namespace")
-				os.Setenv("POD_NAME", "test-pod")
+				Expect(os.Setenv("JOB_NAMESPACE", "test-namespace")).To(Succeed())
+				Expect(os.Setenv("POD_NAME", "test-pod")).To(Succeed())
 
 				_, err := config.Load()
 				Expect(err).To(HaveOccurred())
@@ -104,8 +104,8 @@ var _ = Describe("Config", func() {
 			})
 
 			It("returns error when JOB_NAMESPACE is missing", func() {
-				os.Setenv("JOB_NAME", "test-job")
-				os.Setenv("POD_NAME", "test-pod")
+				Expect(os.Setenv("JOB_NAME", "test-job")).To(Succeed())
+				Expect(os.Setenv("POD_NAME", "test-pod")).To(Succeed())
 
 				_, err := config.Load()
 				Expect(err).To(HaveOccurred())
@@ -113,8 +113,8 @@ var _ = Describe("Config", func() {
 			})
 
 			It("returns error when POD_NAME is missing", func() {
-				os.Setenv("JOB_NAME", "test-job")
-				os.Setenv("JOB_NAMESPACE", "test-namespace")
+				Expect(os.Setenv("JOB_NAME", "test-job")).To(Succeed())
+				Expect(os.Setenv("JOB_NAMESPACE", "test-namespace")).To(Succeed())
 
 				_, err := config.Load()
 				Expect(err).To(HaveOccurred())
@@ -124,13 +124,13 @@ var _ = Describe("Config", func() {
 
 		Context("with invalid integer values", func() {
 			BeforeEach(func() {
-				os.Setenv("JOB_NAME", "test-job")
-				os.Setenv("JOB_NAMESPACE", "test-namespace")
-				os.Setenv("POD_NAME", "test-pod")
+				Expect(os.Setenv("JOB_NAME", "test-job")).To(Succeed())
+				Expect(os.Setenv("JOB_NAMESPACE", "test-namespace")).To(Succeed())
+				Expect(os.Setenv("POD_NAME", "test-pod")).To(Succeed())
 			})
 
 			It("returns error for invalid POLL_INTERVAL_SECONDS", func() {
-				os.Setenv("POLL_INTERVAL_SECONDS", "invalid")
+				Expect(os.Setenv("POLL_INTERVAL_SECONDS", "invalid")).To(Succeed())
 
 				_, err := config.Load()
 				Expect(err).To(HaveOccurred())
@@ -138,7 +138,7 @@ var _ = Describe("Config", func() {
 			})
 
 			It("returns error for invalid MAX_WAIT_TIME_SECONDS", func() {
-				os.Setenv("MAX_WAIT_TIME_SECONDS", "invalid")
+				Expect(os.Setenv("MAX_WAIT_TIME_SECONDS", "invalid")).To(Succeed())
 
 				_, err := config.Load()
 				Expect(err).To(HaveOccurred())
